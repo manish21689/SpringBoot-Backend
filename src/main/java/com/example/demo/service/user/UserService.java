@@ -1,0 +1,9 @@
+
+
+package com.example.demo.service.user;
+
+
+public interface UserService {
+  void sendMsgAllWorker();  
+}
+

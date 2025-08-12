@@ -1,0 +1,380 @@
+//@Override
+//public Map<Long, List<DailyLog>> getLogsByManagerId(Long managerId) {
+//  Map<Long, List<DailyLog>> resultMap = new HashMap<>();
+//  Set<Long> teamMemberIds = new HashSet<>();
+//
+//  // Get workers who report to the given manager
+//  for (Worker worker : userRepo.findAll()) {
+//      if (worker.getManager() != null && worker.getManager().getId().equals(managerId)) {
+//          teamMemberIds.add(worker.getId());
+//      }
+//  }
+//
+//  // Fetch all logs only once to avoid multiple database calls
+//  List<DailyLog> allLogs = dailyLogRepository.findAll();
+//
+//  // Group logs by worker ID if the worker is in teamMemberIds
+//  for (Long id : teamMemberIds) {
+//      List<DailyLog> logsForUser = allLogs.stream()
+//              .filter(log -> log.getWorker() != null && log.getWorker().getId().equals(id))
+//              .collect(Collectors.toList());
+//
+//      resultMap.put(id, logsForUser);
+//  }
+//
+//  return resultMap;
+//}
+
+//@Override
+//public Map<Long, List<DailyLog>> getLogsByManagerId(Long managerId) {
+//    List<Worker> teamMembers = userRepo.findByManagerId(managerId);
+//    Set<Long> memberIds = teamMembers.stream()
+//                                     .map(Worker::getId)
+//                                     .collect(Collectors.toSet());
+//
+//    List<DailyLog> logs = dailyLogRepository.findByUserIdIn(memberIds);
+//
+//    return logs.stream()
+//               .collect(Collectors.groupingBy(
+//                   log -> (Long) log.getUser().getId(), // <-- Explicit cast
+//                   LinkedHashMap::new,
+//                   Collectors.toList()
+//               ));
+//}
+
+
+@Service
+public class DailyLogServiceImpl implements DailyLogService {
+
+    @Autowired
+    private DailyLogRepository dailyLogRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    // SQL: INSERT INTO daily_log (...) VALUES (...)
+    public DailyLog createLog(DailyLog log) {
+        return dailyLogRepository.save(log);
+    }
+
+    // SQL: UPDATE daily_log SET activity=?, date=?, description=? WHERE id=?
+    public DailyLog updateLog(Long id, DailyLog log) {
+        DailyLog existing = dailyLogRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Log not found with ID: " + id));
+
+        existing.setActivity(log.getActivity());
+        existing.setDate(log.getDate());
+        existing.setDescription(log.getDescription());
+        return dailyLogRepository.save(existing);
+    }
+
+    // SQL: DELETE FROM daily_log WHERE id=?
+    public void deleteLog(Long id) {
+        dailyLogRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Log not found with ID: " + id));
+        dailyLogRepository.deleteById(id);
+    }
+
+    // SQL: SELECT * FROM daily_log WHERE id=?
+    public DailyLog getLogById(Long id) {
+        return dailyLogRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Log not found with ID: " + id));
+    }
+
+    // SQL: SELECT * FROM daily_log WHERE worker_id=?
+    public List<DailyLog> getLogsByUserId(Long workerId) {
+        Worker user = userRepository.findById(workerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + workerId));
+        return dailyLogRepository.findByUser(user);
+    }
+
+    // SQL: SELECT * FROM daily_log
+    public List<DailyLog> getAllLogs() {
+        return dailyLogRepository.findAll();
+    }
+
+    /*
+     * SQL: 
+     * SELECT * FROM worker WHERE managerid = ?;
+     * Then for each worker:
+     * SELECT * FROM daily_log WHERE worker_id = ?
+     */
+    public List<DailyLog> getLogsByManagerId(Long managerId) {
+        Worker worker = userRepository.findById(managerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manager not found with ID: " + managerId));
+        
+        List<Worker> team = userRepository.findAll()
+                .stream()
+                .filter(user -> worker.getManager() != null && user.getManager().getId().equals(managerId))
+                .collect(Collectors.toList());
+
+        return team.stream()
+                .flatMap(user -> dailyLogRepository.findByUser(user).stream())
+                .collect(Collectors.toList());
+    }
+
+    // SQL: SELECT * FROM daily_log WHERE date = ?
+    public List<DailyLog> getLogsByDate(LocalDate date) {
+        return dailyLogRepository.findByDate(date);
+    }
+
+    // SQL: SELECT * FROM daily_log WHERE worker_id = ? AND date = ?
+    public List<DailyLog> getLogsByDateAndUser(LocalDate date, Long userId) {
+        Worker user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+        return dailyLogRepository.findByUserAndDate(user, date);
+    }
+    
+    public List<DailyLog> getLogsForLoggedInUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Worker user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        return dailyLogRepository.findByUser(user);
+    }
+    
+    authentication.getPrincipal()	Returns the object set during UsernamePasswordAuthenticationToken.
+instanceof LoggedInUserDTO	Check if the principal is of your custom class (useful to extract ID, role, etc.).
+UserDetailsService	Should return LoggedInUserDTO for consistent access.
+SecurityContextHolder	Stores current user for the request thread (set during JWT validation).
+
+@Autowired
+private UserRepository userRepository;
+
+@Autowired
+private ProjectRepository projectRepository;
+
+@Autowired
+private DailyLogRepository dailyLogRepository;
+
+@Override
+public DailyLogDTO createLog(DailyLogDTO dto) {
+    DailyLog log = new DailyLog();
+
+    log.setActivity(dto.getActivity());
+    log.setDescription(dto.getDescription());
+    log.setDate(dto.getDate());
+
+    // Set worker by ID
+    User worker = userRepository.findById(dto.getWorkerId())
+        .orElseThrow(() -> new RuntimeException("Worker not found with ID: " + dto.getWorkerId()));
+    log.setWorker(worker);
+
+    // Set project by ID
+    Project project = projectRepository.findById(dto.getProjectId())
+        .orElseThrow(() -> new RuntimeException("Project not found with ID: " + dto.getProjectId()));
+    log.setProject(project);
+
+    DailyLog saved = dailyLogRepository.save(log);
+
+    // Convert saved entity to DTO for response
+    DailyLogDTO response = new DailyLogDTO();
+    response.setId(saved.getId());
+    response.setActivity(saved.getActivity());
+    response.setDescription(saved.getDescription());
+    response.setDate(saved.getDate());
+    response.setWorkerId(saved.getWorker().getId());
+    response.setProjectId(saved.getProject().getProjectid());
+
+    return response;
+}
+
+
+@Override
+public DailyLogDTO updateLog(Long id, DailyLogDTO updatedDto) {
+    return dailyLogRepository.findById(id).map(existing -> {
+        existing.setDate(updatedDto.getDate());
+        existing.setActivity(updatedDto.getActivity());
+        existing.setDescription(updatedDto.getDescription());
+
+        // Optionally update worker or project if needed
+        // Worker and Project should be fetched and set only if allowed
+
+        DailyLog saved = dailyLogRepository.save(existing);
+        
+        // Convert back to DTO
+        DailyLogDTO responseDto = new DailyLogDTO();
+        responseDto.setId(saved.getId());
+        responseDto.setActivity(saved.getActivity());
+        responseDto.setDescription(saved.getDescription());
+        responseDto.setDate(saved.getDate());
+        responseDto.setWorkerId(saved.getWorker().getId());
+        responseDto.setProjectId(saved.getProject().getProjectid());
+
+        return responseDto;
+    }).orElseThrow(() -> new RuntimeException("Log not found"));
+}
+
+@Query("SELECT d FROM DailyLog d WHERE d.user.id IN :userIds")
+List<DailyLog> findByUser_IdIn(@Param("userIds") Set<Long> userIds);
+
+@Query(value = "SELECT user_id FROM worker WHERE manager_id = :managerId", nativeQuery = true)
+Set<Long> findUserIdsByManagerId(@Param("managerId") Long managerId);
+
+@Query("SELECT w.userId FROM Worker w WHERE w.manager.id = :managerId")
+Set<Long> findUserIdsByManagerId(@Param("managerId") Long managerId);
+
+@Query(value = "SELECT user_id FROM worker WHERE manager_id = :managerId", nativeQuery = true)
+Set<Long> findUserIdsByManagerId(@Param("managerId") Long managerId);
+
+age<User> findByManagerId(Long managerId, Pageable pageable);
+Example usage:
+
+java
+Copy
+Edit
+PageRequest pageRequest = PageRequest.of(0, 1000);
+Page<User> page = userRepository.findByManagerId(101L, pageRequest);
+➡️ This will fetch 1000 users managed by manager 101L, only the first page.
+
+List<User> findByManagerId(Long managerId);
+SELECT * FROM user WHERE manager_id = ?;
+
+userRepository.findAll()
+    .stream()
+    .filter(user -> user.getManager() != null && managerId.equals(user.getManager().getId()))
+    .collect(Collectors.toList());
+    
+    Option	Pros	Cons
+Java stream()	Easy to write, no DB knowledge needed	Loads all rows into memory — very slow for large data
+SQL query (JPA)	DB does filtering — even without index, it’s faster	Needs a query method or @Query, but very efficient
+
+Complex queries	Use @Query(...) or @Query(nativeQuery = true)	You control exact SQL or JPQL
+
+If you want full control, write:
+
+java
+Copy
+Edit
+@Query("SELECT u FROM User u WHERE u.department.name = :deptName")
+List<User> fetchByDepartment(@Param("deptName") String deptName);
+You can also write native SQL:
+
+java
+Copy
+Edit
+@Query(value = "SELECT * FROM user u JOIN department d ON u.department_id = d.id WHERE d.name = :deptName", nativeQuery = true)
+List<User> fetchWithNativeJoin(@Param("deptName") String deptName);
+
+    
+
+	@Override
+	public List<DailyLog> getLogs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<DailyLog> getAllogs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteAnyLog(Long id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public DailyLog getAnyLogById(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	List<User> findByUsernameAndStatus(String username, String status);
+SQL:
+
+sql
+Copy
+Edit
+SELECT * FROM user WHERE username = ? AND status = ?;
+
+// if u want centralized configuration and application.propterties ke values skip ho ya applcation main value blank ho 
+public class DBConstants {
+  // u can pass values in even by text file using prop.load()
+    public static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:xe";
+    public static final String DB_USER = "pihu";
+    public static final String DB_PASSWORD = "pihu";
+}
+}
+// and in make make class declare as @configuratiio and make ben
+@Bean
+public DataSource dataSource() {
+    DriverManagerDataSource ds = new DriverManagerDataSource();
+    ds.setUrl(DBConstants.DB_URL);
+    ds.setUsername(DBConstants.DB_USER);
+    ds.setPassword(DBConstants.DB_PASSWORD);
+    return ds;
+}
+and u can start writing commad as usualt in jpa repositroy like repo.findall (connection created automatically internally)
+//not good 
+@Bean
+public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(factory);
+    return template;
+}
+public List<Worker> getAllWorkers() {
+    List<Worker> cached = (List<Worker>) redisTemplate.opsForValue().get(WORKER_CACHE_KEY);
+    if (cached != null) return cached;
+
+    List<Worker> workers = ...; // get from DB
+    redisTemplate.opsForValue().set(WORKER_CACHE_KEY, workers, Duration.ofMinutes(10));
+    return workers;
+}
+
+
+//good and ideal
+// if u want automatic caching with minimal code.
+@Bean
+public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(factory);
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    return template;
+}
+@Cacheable(value = "products", key = "#id")
+public Product getProductById(Long id) {
+    return productRepository.findById(id).orElse(null);
+}
+
+Example WebSocket Configuration:
+java
+Copy
+Edit
+@Override
+public void configureMessageBroker(MessageBrokerRegistry config) {
+    config.enableSimpleBroker("/topic");   // destination clients subscribe to
+    config.setApplicationDestinationPrefixes("/app"); // prefix for @MessageMapping
+}
+✅ What Client Should Do:
+👇 Subscribe to Receive:
+javascript
+Copy
+Edit
+stompClient.subscribe('/topic/public', function (message) {
+    const chat = JSON.parse(message.body);
+    console.log("Received: ", chat);
+});
+👆 Send a Message:
+javascript
+Copy
+Edit
+stompClient.send("/app/chat.send", {}, JSON.stringify({
+    sender: "Manish",
+    content: "Hello from frontend",
+    type: "CHAT"
+}));
+
+  @MessageMapping("/chat.send") //jo bhi message karega es per aayeaga
+    @SendTo("/topic/public") //brodcasting
+    public ChatMessage send(ChatMessage message) {
+        return chatService.enrichMessage(message);
+    }
+
+    // Optional direct send
+    public void notify(String sender, String message) {
+        template.convertAndSend("/topic/public", new ChatMessage(sender, message, LocalTime.now().toString()));
+    }

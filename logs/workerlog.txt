@@ -1,0 +1,39 @@
+2025-07-21T00:03:21.100+05:30  INFO 3856 --- [BackEnd] [RMI TCP Connection(12)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2025-07-21T00:03:21.106+05:30  INFO 3856 --- [BackEnd] [RMI TCP Connection(12)-127.0.0.1] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-07-21T00:03:21.115+05:30  INFO 3856 --- [BackEnd] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-07-21T00:03:21.120+05:30  INFO 3856 --- [BackEnd] [RMI TCP Connection(12)-127.0.0.1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-21T00:03:21.122+05:30  INFO 3856 --- [BackEnd] [RMI TCP Connection(12)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-21T00:03:21.130+05:30  INFO 3856 --- [BackEnd] [RMI TCP Connection(12)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-07-21T00:03:23.223+05:30  INFO 8828 --- [BackEnd] [main] com.example.demo.BackEndApplication      : Starting BackEndApplication using Java 21.0.6 with PID 8828 (C:\Users\PC\Documents\workspace-spring-tools-for-eclipse-4.30.0.RELEASE\BackEnd\target\classes started by PC in C:\Users\PC\Documents\workspace-spring-tools-for-eclipse-4.30.0.RELEASE\BackEnd)
+2025-07-21T00:03:23.225+05:30  INFO 8828 --- [BackEnd] [main] com.example.demo.BackEndApplication      : No active profile set, falling back to 1 default profile: "default"
+2025-07-21T00:03:23.887+05:30  INFO 8828 --- [BackEnd] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-21T00:03:23.958+05:30  INFO 8828 --- [BackEnd] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 62 ms. Found 4 JPA repository interfaces.
+2025-07-21T00:03:24.475+05:30  INFO 8828 --- [BackEnd] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+2025-07-21T00:03:24.489+05:30  INFO 8828 --- [BackEnd] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-07-21T00:03:24.489+05:30  INFO 8828 --- [BackEnd] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-07-21T00:03:24.539+05:30  INFO 8828 --- [BackEnd] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-07-21T00:03:24.539+05:30  INFO 8828 --- [BackEnd] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1269 ms
+2025-07-21T00:03:24.753+05:30  INFO 8828 --- [BackEnd] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-21T00:03:24.820+05:30  INFO 8828 --- [BackEnd] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2025-07-21T00:03:24.862+05:30  INFO 8828 --- [BackEnd] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-07-21T00:03:25.084+05:30  INFO 8828 --- [BackEnd] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-21T00:03:25.113+05:30  INFO 8828 --- [BackEnd] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-21T00:03:25.329+05:30  INFO 8828 --- [BackEnd] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@1fd37440
+2025-07-21T00:03:25.331+05:30  INFO 8828 --- [BackEnd] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-21T00:03:25.422+05:30  WARN 8828 --- [BackEnd] [main] org.hibernate.dialect.Dialect            : HHH000511: The 11.2.0 version for [org.hibernate.dialect.OracleDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 19.0.0. Check the community dialects project for available legacy versions.
+2025-07-21T00:03:25.426+05:30  WARN 8828 --- [BackEnd] [main] org.hibernate.orm.deprecation            : HHH90000025: OracleDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-07-21T00:03:26.445+05:30  INFO 8828 --- [BackEnd] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-07-21T00:03:26.579+05:30  INFO 8828 --- [BackEnd] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-21T00:03:26.968+05:30  WARN 8828 --- [BackEnd] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-21T00:03:27.011+05:30  INFO 8828 --- [BackEnd] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2025-07-21T00:03:27.594+05:30  INFO 8828 --- [BackEnd] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+2025-07-21T00:03:27.601+05:30  INFO 8828 --- [BackEnd] [main] com.example.demo.BackEndApplication      : Started BackEndApplication in 4.787 seconds (process running for 5.4)
+2025-07-21T00:03:31.294+05:30  INFO 8828 --- [BackEnd] [http-nio-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-21T00:03:31.295+05:30  INFO 8828 --- [BackEnd] [http-nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-07-21T00:03:31.296+05:30  INFO 8828 --- [BackEnd] [http-nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-07-21T00:05:36.288+05:30  INFO 8828 --- [BackEnd] [RMI TCP Connection(4)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2025-07-21T00:05:36.291+05:30  INFO 8828 --- [BackEnd] [RMI TCP Connection(4)-127.0.0.1] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-07-21T00:05:36.296+05:30  INFO 8828 --- [BackEnd] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-07-21T00:05:36.300+05:30  INFO 8828 --- [BackEnd] [RMI TCP Connection(4)-127.0.0.1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-21T00:05:36.301+05:30  INFO 8828 --- [BackEnd] [RMI TCP Connection(4)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-07-21T00:05:36.307+05:30  INFO 8828 --- [BackEnd] [RMI TCP Connection(4)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
